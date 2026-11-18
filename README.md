@@ -42,6 +42,10 @@ Webhook ─► Make AI (Extract) ─► Router ─┬─ Accepted ─► Airtabl
 | Jonas Weber · Germany | rejected | rejected · "Not a lead for Canada or Australia." |
 | Priya Nair · Australia · 3 items | accepted, 60 | accepted, 60 |
 
+The three accepted leads on the live dashboard (Stage filter: New; the new leads are outlined):
+
+![Dashboard with the three new leads](docs/dashboard-2026-11-18.png)
+
 The first run used the AI's *Small* model, which scored Lina 60 instead of 100. Switching to *Medium* fixed it. Cost: about 3 credits per lead.
 
 ## Import it into your own Make account
