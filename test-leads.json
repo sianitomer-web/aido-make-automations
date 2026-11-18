@@ -1,0 +1,47 @@
+[
+  {
+    "payload": {
+      "name": "Lina Haddad",
+      "source": "Meta",
+      "message": "Hi, I am a registered nurse, 32, married with one child. Bachelor of Nursing, IELTS 7.5. We want to move to Toronto, Canada next year. What are our options?"
+    },
+    "expected": "accepted · Canada · completeness 100",
+    "response": { "status": "accepted", "country": "Canada", "completeness": 100 }
+  },
+  {
+    "payload": {
+      "name": "Tom Reilly",
+      "source": "Google Search",
+      "message": "Electrician, 41. Looking at skilled visas for Australia. Can you call me?"
+    },
+    "expected": "accepted · Australia · completeness 40",
+    "response": { "status": "accepted", "country": "Australia", "completeness": 40 }
+  },
+  {
+    "payload": {
+      "name": "Best SEO Agency",
+      "source": "Organic",
+      "message": "We can get your website to page 1 of Google in 7 days! Reply for a free audit. Click here: cheap-seo-deal.biz"
+    },
+    "expected": "rejected · spam",
+    "response": { "status": "rejected", "reason": "Spam ad; not about immigrating or studying." }
+  },
+  {
+    "payload": {
+      "name": "Jonas Weber",
+      "source": "Webinar",
+      "message": "I am a software engineer, 29, single, master degree. I would like to relocate to Berlin, Germany."
+    },
+    "expected": "rejected · destination not served",
+    "response": { "status": "rejected", "reason": "Not a lead for Canada or Australia." }
+  },
+  {
+    "payload": {
+      "name": "Priya Nair",
+      "source": "Referral",
+      "message": "My friend recommended you. I am 24, finishing a degree in accounting, single, and want to study and work in Melbourne, Australia."
+    },
+    "expected": "accepted · Australia · completeness 60",
+    "response": { "status": "accepted", "country": "Australia", "completeness": 60 }
+  }
+]

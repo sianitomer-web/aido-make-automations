@@ -1,0 +1,226 @@
+{
+  "name": "Harbor – new lead intake (AI → Airtable)",
+  "flow": [
+    {
+      "id": 1,
+      "mapper": {},
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "metadata": {
+        "designer": { "x": 0, "y": 0 }
+      },
+      "parameters": {
+        "hook": 4523036,
+        "maxResults": 1
+      }
+    },
+    {
+      "id": 2,
+      "mapper": {
+        "input": "Lead name: {{1.name}}\nMessage: {{1.message}}",
+        "fields": [
+          {
+            "name": "is_real_lead",
+            "type": "boolean",
+            "description": "true if this is a genuine person asking about immigrating, working or studying abroad; false for spam, ads, SEO offers, gibberish or test messages"
+          },
+          {
+            "name": "country",
+            "type": "string",
+            "description": "The destination country the person wants to move to. Answer exactly 'Canada' or 'Australia'. If it is any other country, or not stated, answer 'Other'"
+          },
+          {
+            "name": "completeness",
+            "type": "number",
+            "description": "Share of the intake profile the message answers, 0 to 100, in steps of 20. Count one 20-point step for each of these five items that is clearly stated: age, occupation or profession, English level (e.g. IELTS score), education, family status (single, married, children). Example: age and profession stated, nothing else = 40"
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "description": "One short sentence, under 12 words, explaining the decision: why this is or is not a real lead for Canada or Australia. No quotation marks."
+          }
+        ]
+      },
+      "module": "ai-tools:Extract",
+      "version": 2,
+      "metadata": {
+        "restore": {
+          "expect": {
+            "fields": {
+              "items": [
+                { "type": { "mode": "chose", "label": "Boolean" } },
+                { "type": { "mode": "chose", "label": "Text" } },
+                { "type": { "mode": "chose", "label": "Number" } },
+                { "type": { "mode": "chose", "label": "Text" } }
+              ]
+            }
+          },
+          "parameters": {
+            "model": {
+              "mode": "chose",
+              "label": "MediumModel: gpt-5-nano. Reasoning: low. A balanced, quick choice for clearly defined tasks needing reliable answers rather than deep analysis",
+              "nested": []
+            },
+            "makeConnectionId": {
+              "data": { "scoped": "true", "connection": "ai-provider" },
+              "label": "Tomer's Make's AI Provider connection"
+            }
+          }
+        },
+        "designer": { "x": 300, "y": 0 }
+      },
+      "parameters": {
+        "model": "medium",
+        "makeConnectionId": 14746408
+      }
+    },
+    {
+      "id": 3,
+      "mapper": null,
+      "module": "builtin:BasicRouter",
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 4,
+              "filter": {
+                "name": "Accepted · real lead for Canada or Australia",
+                "conditions": [
+                  [
+                    { "a": "{{2.information.is_real_lead}}", "b": "true", "o": "boolean:equal" },
+                    { "a": "{{2.information.country}}", "b": "Canada", "o": "text:equal" }
+                  ],
+                  [
+                    { "a": "{{2.information.is_real_lead}}", "b": "true", "o": "boolean:equal" },
+                    { "a": "{{2.information.country}}", "b": "Australia", "o": "text:equal" }
+                  ]
+                ]
+              },
+              "mapper": {
+                "base": "appebfLHM5VJ3mBcI",
+                "table": "tblBy3u1dAeJtFCGW",
+                "record": {
+                  "fldEJMNjRc2G0FbX2": "{{if(contains(\"Meta|Google Search|Organic|Webinar|Referral\"; 1.source); 1.source; \"Organic\")}}",
+                  "fldGFfYtdjkVdpzZe": "{{1.name}}",
+                  "fldHH4iAvnCQTW9EG": "{{2.information.country}}",
+                  "fldLOHbWsfkE7VR69": "New",
+                  "fldMakcWt6UBMEpTW": "W-{{formatDate(now; \"YYMMDD-HHmmss\")}}",
+                  "fldMnH0SfHGYXOlQP": "{{now}}",
+                  "fldgG5IqHYfiCZti8": "none",
+                  "fldmjXLqvC5g0hG7Q": "{{now}}",
+                  "fldqfTeiW53RL0qzp": "{{2.information.completeness}}"
+                },
+                "typecast": false,
+                "useColumnId": true
+              },
+              "module": "airtable:ActionCreateRecord",
+              "version": 3,
+              "metadata": {
+                "designer": { "x": 900, "y": -150 }
+              },
+              "parameters": {
+                "__IMTCONN__": 14746400
+              }
+            },
+            {
+              "id": 5,
+              "mapper": {
+                "body": "{\"status\":\"accepted\",\"country\":\"{{2.information.country}}\",\"completeness\":{{2.information.completeness}}}",
+                "status": 200,
+                "headers": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ]
+              },
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "metadata": {
+                "designer": { "x": 1200, "y": -150 }
+              },
+              "parameters": {}
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "filter": {
+                "name": "Rejected · spam or other destination",
+                "conditions": [
+                  [
+                    { "a": "{{2.information.is_real_lead}}", "b": "false", "o": "boolean:equal" }
+                  ],
+                  [
+                    { "a": "{{2.information.country}}", "b": "Canada", "o": "text:notequal" },
+                    { "a": "{{2.information.country}}", "b": "Australia", "o": "text:notequal" }
+                  ]
+                ]
+              },
+              "mapper": {
+                "base": "appebfLHM5VJ3mBcI",
+                "table": "tblxzmCS0jhDWy5xV",
+                "record": {
+                  "fld1hzAnwq7CgEEKG": "{{2.information.is_real_lead}}",
+                  "fld5EPcotua0HuzPl": "{{1.name}}",
+                  "fldE5VLTTWoKvJQmv": false,
+                  "fldGGUQdcLSRIBFaF": "{{now}}",
+                  "fldHTFfMCWstCOLuG": "{{1.message}}",
+                  "fldJ3geH9eCvoq2Nr": "{{2.information.reason}}",
+                  "fldosPXtaJCU72d3o": "{{2.information.country}}",
+                  "fldzcm8Zo7JZai5a6": "{{1.source}}"
+                },
+                "typecast": false,
+                "useColumnId": true
+              },
+              "module": "airtable:ActionCreateRecord",
+              "version": 3,
+              "metadata": {
+                "designer": { "x": 900, "y": 150 }
+              },
+              "parameters": {
+                "__IMTCONN__": 14746400
+              }
+            },
+            {
+              "id": 7,
+              "mapper": {
+                "body": "{\"status\":\"rejected\",\"reason\":\"{{2.information.reason}}\"}",
+                "status": 200,
+                "headers": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ]
+              },
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "metadata": {
+                "designer": { "x": 1200, "y": 150 }
+              },
+              "parameters": {}
+            }
+          ]
+        }
+      ],
+      "version": 1,
+      "metadata": {
+        "designer": { "x": 600, "y": 0 }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "designer": { "orphans": [] },
+    "scenario": {
+      "dlq": false,
+      "slots": null,
+      "dataloss": false,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "roundtrips": 1,
+      "sequential": false,
+      "confidential": false,
+      "freshVariables": false,
+      "autoCommitTriggerLast": true
+    }
+  }
+}
