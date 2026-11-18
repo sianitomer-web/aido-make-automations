@@ -31,6 +31,8 @@ Webhook ─► Make AI (Extract) ─► Router ─┬─ Accepted ─► Airtabl
 |------|------------|
 | `blueprints/harbor-lead-intake.blueprint.json` | The scenario, exported from Make (Blueprint) |
 | `test-leads.json` | Five test leads, what each should do, and the reply each got |
+| `blueprints/imported/calendar-from-airtable.original.blueprint.json` | A public Make template, as imported (see below) |
+| `blueprints/imported/calendar-from-airtable.adapted.blueprint.json` | The same template after my changes |
 
 ## Test run (18 Nov 2026)
 
@@ -59,3 +61,25 @@ curl -X POST "<your webhook URL>" \
 ```
 
 The blueprint holds no data, passwords or tokens. The connection, webhook, base and table IDs in it point to the author's account and do nothing elsewhere; steps 2–4 replace them. The live webhook URL is not published.
+
+## Imported template: a calendar slot for each new lead
+
+To practise importing someone else's automation, I took Make's public template **"Create Google Calendar events from Airtable records"** and pointed it at the same `Leads` table. Each new lead gets a 15-minute "call" slot in the sales calendar, one hour after it arrived.
+
+```
+Airtable: Watch records (Leads, new rows) ─► Google Calendar: Create an event ("Call: <name>")
+```
+
+**What I changed in the template, and why:**
+
+| In the template | Problem | Change |
+|-----------------|---------|--------|
+| Event date fixed to 1 Jan 2023, 17:00 | Every event would land in 2023 | Start = one hour after the lead was added; 15 minutes long |
+| Iterator + Array aggregator for an `Attendees` field | Built to email invitations; our leads have no email and nothing should go to a lead without a person checking | Removed both; the event goes only to the sales calendar, with notifications off |
+| Title `Event{{name}}` | No space, no context | "Call: <name>" (in Hebrew); description: country, source, profile completeness |
+| Checks Airtable every 15 minutes | About 2,900 runs a month, far above the Free plan's 1,000 credits, most of them empty | Set to run on demand; a filter reads only leads added on or after 18 Nov 2026 |
+
+The trigger needs a Created Time field, so I added `record_created` to the `Leads` table. The dashboard does not read it.
+
+**Run (18 Nov 2026):** one manual run, 4 credits, three events in a separate test calendar, one for each accepted test lead. No invitations were sent.
+

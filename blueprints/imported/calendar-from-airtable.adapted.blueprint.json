@@ -1,0 +1,97 @@
+{
+  "name": "Create Google Calendar events from Airtable records",
+  "flow": [
+    {
+      "id": 1,
+      "mapper": {},
+      "module": "airtable:TriggerWatchRecords",
+      "version": 3,
+      "metadata": {
+        "restore": {
+          "parameters": {
+            "base": { "label": "Harbor Leads" },
+            "view": { "label": "Empty" },
+            "table": { "label": "Leads" },
+            "config": {
+              "nested": {
+                "labelField": { "label": "name" },
+                "triggerField": { "label": "record_created" }
+              }
+            },
+            "__IMTCONN__": {
+              "data": { "scoped": "true", "connection": "airtable3" },
+              "label": "Airtable OAuth connection"
+            }
+          }
+        },
+        "designer": { "x": 0, "y": 0 }
+      },
+      "parameters": {
+        "base": "appebfLHM5VJ3mBcI",
+        "view": "",
+        "table": "tblBy3u1dAeJtFCGW",
+        "config": { "labelField": "name", "triggerField": "record_created" },
+        "formula": "IS_AFTER({record_created}, DATETIME_PARSE('2026-11-18', 'YYYY-MM-DD'))",
+        "maxRecords": 10,
+        "__IMTCONN__": 14746400,
+        "useColumnId": false
+      }
+    },
+    {
+      "id": 2,
+      "module": "google-calendar:createAnEvent",
+      "version": 5,
+      "parameters": { "__IMTCONN__": 3419049 },
+      "mapper": {
+        "select": "detail",
+        "calendar": "b0aab980cb335d2a1f1d2a8cdca341c247dbdbbed6b5eb5cda6c1584f5090d32@group.calendar.google.com",
+        "summary": "להתקשר: {{1.name}}",
+        "description": "{{1.country}} · {{1.source}} · פרופיל {{1.completeness}}% · ליד {{1.id}}",
+        "start": "{{addHours(1.record_created; 1)}}",
+        "end": "{{addMinutes(addHours(1.record_created; 1); 15)}}",
+        "allDayEvent": false,
+        "conferenceDate": false,
+        "visibility": "default",
+        "transparency": "opaque",
+        "sendUpdates": "none"
+      },
+      "metadata": {
+        "restore": {
+          "expect": {
+            "select": { "label": "In Detail" },
+            "calendar": { "mode": "chose", "label": "Harbor - test" },
+            "visibility": { "mode": "chose", "label": "Default" },
+            "transparency": { "mode": "chose", "label": "Busy" },
+            "sendUpdates": { "mode": "chose", "label": "None" },
+            "allDayEvent": { "mode": "chose" },
+            "conferenceDate": { "mode": "chose" }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": { "scoped": "true", "connection": "google" },
+              "label": "Google connection"
+            }
+          }
+        },
+        "designer": { "x": 300, "y": 0 }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "designer": { "orphans": [] },
+    "scenario": {
+      "dlq": false,
+      "slots": null,
+      "dataloss": false,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "roundtrips": 1,
+      "sequential": false,
+      "confidential": false,
+      "freshVariables": false,
+      "autoCommitTriggerLast": true
+    }
+  }
+}

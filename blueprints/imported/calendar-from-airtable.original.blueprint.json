@@ -1,0 +1,121 @@
+{
+  "name": "Create Google Calendar events from Airtable records",
+  "flow": [
+    {
+      "id": 1,
+      "mapper": {},
+      "module": "airtable:TriggerWatchRecords",
+      "version": 3,
+      "metadata": {
+        "restore": {
+          "parameters": {
+            "base": { "label": "Harbor Leads" },
+            "view": { "label": "Empty" },
+            "table": { "label": "Leads" },
+            "config": {
+              "nested": {
+                "labelField": { "label": "name" },
+                "triggerField": { "label": "record_created" }
+              }
+            },
+            "__IMTCONN__": {
+              "data": { "scoped": "true", "connection": "airtable3" },
+              "label": "Airtable OAuth connection"
+            }
+          }
+        },
+        "designer": { "x": 0, "y": 0 }
+      },
+      "parameters": {
+        "base": "appebfLHM5VJ3mBcI",
+        "view": "",
+        "table": "tblBy3u1dAeJtFCGW",
+        "config": { "labelField": "name", "triggerField": "record_created" },
+        "formula": "",
+        "maxRecords": 10,
+        "__IMTCONN__": 14746400,
+        "useColumnId": false
+      }
+    },
+    {
+      "id": 3,
+      "mapper": { "array": "" },
+      "module": "builtin:BasicFeeder",
+      "version": 1,
+      "metadata": {
+        "restore": { "expect": { "array": { "mode": "edit" } } },
+        "designer": { "x": 300, "y": 0 }
+      },
+      "parameters": {}
+    },
+    {
+      "id": 5,
+      "mapper": { "email": "{{3.value}}", "displayName": "" },
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "metadata": {
+        "restore": { "extra": { "feeder": {}, "target": {} } },
+        "designer": { "x": 600, "y": 0 }
+      },
+      "parameters": { "feeder": 3, "target": "2.attendees" }
+    },
+    {
+      "id": 2,
+      "mapper": {
+        "end": "2023-01-01T17:30:00.000Z",
+        "start": "2023-01-01T17:00:00.000Z",
+        "select": "detail",
+        "summary": "Event{{1.name}}",
+        "calendar": "b0aab980cb335d2a1f1d2a8cdca341c247dbdbbed6b5eb5cda6c1584f5090d32@group.calendar.google.com",
+        "attendees": "{{5.array}}",
+        "visibility": "default",
+        "allDayEvent": false,
+        "transparency": "opaque",
+        "conferenceDate": false,
+        "guestPermissions": {
+          "guestsCanModify": false,
+          "guestsCanInviteOthers": true,
+          "guestsCanSeeOtherGuests": true
+        }
+      },
+      "module": "google-calendar:createAnEvent",
+      "version": 5,
+      "metadata": {
+        "restore": {
+          "expect": {
+            "select": { "label": "In Detail" },
+            "calendar": { "mode": "chose", "label": "Harbor - test" },
+            "attendees": { "mode": "edit" },
+            "visibility": { "mode": "chose", "label": "Default" },
+            "transparency": { "mode": "chose", "label": "Busy" }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": { "scoped": "true", "connection": "google" },
+              "label": "Google connection"
+            }
+          }
+        },
+        "designer": { "x": 900, "y": 0 }
+      },
+      "parameters": { "__IMTCONN__": 3419049 }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "designer": { "orphans": [] },
+    "scenario": {
+      "dlq": false,
+      "slots": null,
+      "dataloss": false,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "roundtrips": 1,
+      "sequential": false,
+      "confidential": false,
+      "freshVariables": false,
+      "autoCommitTriggerLast": true
+    }
+  }
+}
