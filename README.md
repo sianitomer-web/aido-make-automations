@@ -74,7 +74,7 @@ Airtable: Watch records (Leads, new rows) ─► Google Calendar: Create an even
 
 | In the template | Problem | Change |
 |-----------------|---------|--------|
-| Event date fixed to 1 Jan 2023, 17:00 | Every event would land in 2023 | Start = one hour after the lead was added; 15 minutes long |
+| Event date fixed to 1 Jan 2023, 17:00 | Every event would land in 2023 | Start = one hour after the lead was added, plus 0 to 59 minutes taken from the second it was created, so leads added together do not share one slot; 15 minutes long |
 | Iterator + Array aggregator for an `Attendees` field | Built to email invitations; our leads have no email and nothing should go to a lead without a person checking | Removed both; the event goes only to the sales calendar, with notifications off |
 | Title `Event{{name}}` | No space, no context | "Call: <name>" (in Hebrew); description: country, source, profile completeness |
 | Checks Airtable every 15 minutes | About 2,900 runs a month, far above the Free plan's 1,000 credits, most of them empty | Set to run on demand; a filter reads only leads added on or after 18 Nov 2026 |
